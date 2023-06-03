@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 9000
 
 app.use(cors());
 app.use(express.json());
@@ -18,41 +18,74 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
-
         const bloodDonor = client.db('blood_donor').collection('donors');
 
 
-        // http://localhost:5000/donors 
+        // getting all/specific user by query 
+        // http://localhost:5000/donors?email= 
         app.get('/donors', async (req, res) => {
-            const query = {};// both are same
-            const q = req.query
-            console.log(q);
+            // const query = {};// both are same
+            // const search = req.query.email
+            // console.log(search);
+            // console.log("serching donora");
+            // const q = req.query
+            // console.log(q);
             // const cursor = bloodDonor.find({name:"Tanvir Hossain"})
             // const cursor = bloodDonor.find({bldGroup:"A-"})
-            const cursor = bloodDonor.find(q)
-            const donors = await cursor.toArray()
-            res.send(donors);
+
+            //----------- single user query ---------------------
+            if (req.query.email) {
+                console.log("line>", "in side the query");
+                const userEmail = req.query.email
+                const query = { email: userEmail };
+                const userInfo = await bloodDonor.findOne(query)
+                console.log(userInfo);
+
+                if (userInfo === null) {
+                    res.send("null")
+                } else {
+
+                    res.send(userInfo);
+                }
+
+            }
+            else {
+                const query = {};
+                const cursor = bloodDonor.find(query)
+                const donors = await cursor.toArray()
+                res.send(donors);
+            }
         })
 
 
         // http://localhost:5000/admin
-        app.get('/admin', async (req, res) => {
-            const query = { designation: "main" };
-            const cursor = bloodDonor.find(query)
-            const donors = await cursor.toArray()
-            res.send(donors);
-        })
+        // app.get('/admin', async (req, res) => {
+        //     const query = { designation: "main" };
+        //     const cursor = bloodDonor.find(query)
+        //     const donors = await cursor.toArray()
+        //     res.send(donors);
+        // })
 
         app.get('/admin', async (req, res) => {
-            const query = { designation: "main" };
+            const query = { role: "admin" };
             const cursor = bloodDonor.find(query)
             const donors = await cursor.toArray()
             res.send(donors);
+
         })
 
 
         // http://localhost:5000/donor
         app.post('/donor', async (req, res) => {
+            const data = req.body
+            console.log(data);
+            const result = await bloodDonor.insertOne(data)
+            res.send(result)
+            console.log("data inserted")
+        })
+
+        //➡️➡️➡️created new user by registration/signup
+        app.post('/newuser', async (req, res) => {
             const data = req.body
             console.log(data);
             const result = await bloodDonor.insertOne(data)
@@ -74,6 +107,7 @@ async function run() {
                 },
             };
             const result = await bloodDonor.updateOne(filter, updateDoc, options);
+            console.log("data updated");
             res.send(result)
         })
 
