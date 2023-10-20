@@ -8,20 +8,29 @@ const viewCount = require('../../middleware/viewcount');
 // donorRouter.get('/', (req, res) => {
 //     res.send("donors found")
 // })
+donorRouter.route('/admin')
+    .get(donorController.adminDonor)
+    // .get(viewCount, donorController.adminDonor)
+    .put(viewCount, donorController.updateAdminRole)
+
+    
 donorRouter.route('/:email')
-    .put( donorController.updateDonorData)
+    .put(donorController.updateDonorData)
 
 
 donorRouter.route('')
-    .get(viewCount,donorController.getAllDonors)
+    .get(viewCount, donorController.getAllDonors)
     .post(viewCount, donorController.saveNewDonor)
 
 
 
 
-donorRouter.route('/admin')
-    .get( donorController.adminDonor)
-    // .get(viewCount, donorController.adminDonor)
+
+
+// donorRouter.route('/admin')
+//     .get( donorController.adminDonor)
+//     // .get(viewCount, donorController.adminDonor)
+//     .put()
 
 
 
